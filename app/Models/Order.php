@@ -14,6 +14,7 @@ class Order extends Model
         'payment_method',
         'total_price',
         'items',
+        'status',
     ];
 
     protected $casts = [

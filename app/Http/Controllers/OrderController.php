@@ -10,7 +10,20 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = Order::where('user_id', $request->user()->id)->latest()->get();
+        $query = Order::query();
+
+        if ($request->user()->isAdmin()) {
+            $query->whereIn('status', ['requested', 'paid']);
+        } else {
+            $query->where('user_id', $request->user()->id);
+        }
+        //name,email
+        $orders = $query->with('user')->latest()->get()->map(function ($order) {
+            $order->user_name = $order->user ? $order->user->name : null;
+            $order->user_email = $order->user ? $order->user->email : null;
+            return $order;
+        });
+
         return response()->json($orders);
     }
 
@@ -22,17 +35,18 @@ class OrderController extends Controller
             'payment_method' => 'required|string',
             'total_price'    => 'required|numeric',
             'items'          => 'required|array',
-            'cart_item_ids'  => 'nullable|array',
+            'cart_item_ids'  => 'nullable|array',//id
         ]);
 
         $order = Order::create([
             'user_id'        => $request->user()->id,
-            'order_number'   => 'ORD-' . rand(100000, 999999),
+            'order_number'   => 'ORD-' . rand(1000, 9999),//random
             'address'        => $request->address,
             'phone'          => $request->phone,
             'payment_method' => $request->payment_method,
             'total_price'    => $request->total_price,
             'items'          => $request->items,
+            'status'         => 'requested',
         ]);
 
         // Delete only the checked-out items from the user's cart

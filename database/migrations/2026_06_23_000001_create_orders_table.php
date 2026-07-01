@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('payment_method');
             $table->decimal('total_price', 10, 2);
             $table->json('items');
+            $table->string('status')->default('requested');
             $table->timestamps();
         });
     }

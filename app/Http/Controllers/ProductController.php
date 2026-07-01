@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    private function format($product)
+    private function format(product $product)
     {
         return [
             'id'          => $product->id,
@@ -23,10 +23,10 @@ class ProductController extends Controller
         ];
     }
 
-    private function saveImages(Request $request, $product, $isUpdate = false)
+    private function saveImages(Request $request, product $product, $isUpdate = false)
     {
         if (!$request->hasFile('images')) return;
-        
+
         $images = [];
         if ($isUpdate) {
             if (!empty($product->images)) {
@@ -41,7 +41,7 @@ class ProductController extends Controller
         foreach ($request->file('images') as $img) {
             $images[] = $img->store('products', 'public');
         }
-        
+
         $product->update(['images' => $images]);
     }
 
@@ -81,13 +81,13 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product created', 'product' => $this->format($product->load('category'))], 201);
     }
 
-    public function show(Request $request, $id)
+    public function show(Request $request, product $id)
     {
         $product = Product::with('category')->findOrFail($id);
         return response()->json($this->format($product));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, product $id)
     {
         $product = Product::findOrFail($id);
         $request->validate([
@@ -108,13 +108,13 @@ class ProductController extends Controller
 
 
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, product $id)
     {
         Product::findOrFail($id)->delete();
         return response()->json(['message' => 'Product deleted']);
     }
 
-    public function restore(Request $request, $id)
+    public function restore(Request $request, product $id)
     {
         Product::withTrashed()->findOrFail($id)->restore();
         return response()->json(['message' => 'Product restored']);
